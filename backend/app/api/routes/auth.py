@@ -1,14 +1,13 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.dependencies import get_db, get_current_user
 from app.core.security import create_access_token, verify_password
 from app.models.user import User
-from app.schemas.user import Token, UserCreate, UserOut
+from app.schemas.user import Token, UserCreate, UserLogin, UserOut
 from app.services.user_service import create_user, get_user_by_email
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -22,12 +21,12 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(login_data: UserLogin, db: Session = Depends(get_db)):
     """
     Authenticate and return a JWT token.
-    Uses OAuth2 form: 'username' field = email, 'password' field = password.
+    Expects JSON body with 'email' and 'password'.
     """
-    email = (form_data.username or "").strip()
+    email = (login_data.email or "").strip()
     auth_headers = {"WWW-Authenticate": "Bearer"}
 
     user = get_user_by_email(db, email)
@@ -43,7 +42,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             detail="This account has been deactivated. Please contact an admin.",
             headers=auth_headers,
         )
-    if not verify_password(form_data.password, user.hashed_password):
+    if not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect password.",

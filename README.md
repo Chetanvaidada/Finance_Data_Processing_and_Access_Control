@@ -8,7 +8,7 @@ A full-stack financial tracking app with role-based access control, JWT authenti
 
 - Python 3.10+ (backend)
 - Node.js 18+ and npm (frontend)
-- PostgreSQL running locally
+- PostgreSQL for local development (optional if using hosted DB)
 
 ### 2) Backend Setup
 
@@ -47,6 +47,23 @@ A full-stack financial tracking app with role-based access control, JWT authenti
 - API docs: `http://localhost:8000/docs`
 - Health check: `http://localhost:8000/health`
 - Frontend talks to backend at `http://localhost:8000/api/v1`
+
+## Deployment Setup (Current)
+
+- Backend is deployed as a FastAPI web service on Render.
+- PostgreSQL database is hosted on Supabase.
+- Application configuration is provided through Render environment variables (not committed in code).
+- Frontend should consume the deployed backend base URL through environment-based configuration.
+
+### Required Production Environment Variables
+
+- `DATABASE_URL` (Supabase Postgres connection string)
+- `SECRET_KEY`
+- `ALGORITHM`
+- `ACCESS_TOKEN_EXPIRE_MINUTES`
+- `CORS_ORIGINS` (JSON array format)
+- `APP_NAME`
+- `DEBUG` (`False` in production)
 
 ## API Explanation
 
@@ -88,8 +105,9 @@ The API is built with FastAPI and mounted under `/api/v1`.
 
 ## Assumptions Made
 
-- The app runs in local development with backend on port `8000` and frontend on port `5173`.
-- PostgreSQL is available and reachable via `DATABASE_URL`.
+- The app supports both local development and hosted deployment.
+- In production, the backend is hosted on Render and the database is hosted on Supabase.
+- All secrets and runtime settings are injected via environment variables.
 - JWT is the preferred authentication mechanism for this project scope.
 - The backend owns role enforcement; frontend UX visibility is not treated as a security boundary.
 - Default seeded users and data are acceptable for development/demo environments.
@@ -110,3 +128,6 @@ The API is built with FastAPI and mounted under `/api/v1`.
 
 - **Hardcoded frontend API base URL vs environment-driven frontend config**  
   A fixed base URL reduces config complexity in local dev, but environment-based frontend configuration is better for staging/production deployments.
+
+- **Managed cloud services vs local infrastructure control**  
+  Render + Supabase reduce operational overhead and speed up deployment, but add platform dependencies and require careful env/config management.

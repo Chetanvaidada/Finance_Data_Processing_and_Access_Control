@@ -1,14 +1,14 @@
 from typing import Annotated, List
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.core.security import decode_access_token
 from app.db.session import SessionLocal
 from app.models.user import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+bearer_scheme = HTTPBearer()
 
 
 def get_db():
@@ -21,7 +21,7 @@ def get_db():
 
 
 def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
     db: Session = Depends(get_db),
 ) -> User:
     """Decode the JWT token and return the current authenticated user."""
@@ -30,7 +30,7 @@ def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    payload = decode_access_token(token)
+    payload = decode_access_token(credentials.credentials)
     if payload is None:
         raise credentials_exception
 

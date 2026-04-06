@@ -21,13 +21,7 @@ export function AuthProvider({ children }) {
   const loading = false;
 
   const login = async (email, password) => {
-    const formData = new URLSearchParams();
-    formData.append('username', email);
-    formData.append('password', password);
-
-    const res = await API.post('/auth/login', formData, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
+    const res = await API.post('/auth/login', { email, password });
     const accessToken = res.data.access_token;
     localStorage.setItem('token', accessToken);
     setToken(accessToken);
