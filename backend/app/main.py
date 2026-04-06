@@ -18,16 +18,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Startup and shutdown logic."""
-    logger.info("Creating database tables...")
-    Base.metadata.create_all(bind=engine)
-    logger.info("Database tables created successfully")
-    yield
-    logger.info("Application shutting down...")
-
-
 # Create FastAPI application
 app = FastAPI(
     title=settings.APP_NAME,
@@ -35,7 +25,6 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan,
 )
 
 # CORS middleware
